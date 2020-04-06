@@ -1,6 +1,5 @@
 import React from "react";
 import Particles from "react-particles-js";
-import Clarifai from "clarifai";
 import Navigation from "./components/Navigation/Navigation";
 import Signin from "./components/Signin/Signin";
 import Register from "./components/Register/Register";
@@ -10,20 +9,16 @@ import Rank from "./components/Rank/Rank";
 import ImageLinkForm from "./components/ImageLinkForm/ImageLinkForm";
 import "./App.css";
 
-const app = new Clarifai.App({
-  apiKey: "4060302e88684205ac4cf81edf5bad47"
-});
-
 const particlesOptions = {
   particles: {
     number: {
       value: 100,
       density: {
         enable: true,
-        value_area: 800
-      }
-    }
-  }
+        value_area: 800,
+      },
+    },
+  },
 };
 
 const initialState = {
@@ -37,39 +32,25 @@ const initialState = {
     name: "",
     email: "",
     entries: 0,
-    joined: ""
-  }
+    joined: "",
+  },
 };
 
 class App extends React.Component {
   constructor() {
     super();
     this.state = initialState;
-    // this.state = {
-    //   input: "",
-    //   imageUrl: "",
-    //   box: {},
-    //   route: "signout",
-    //   isSignedIn: false,
-    //   user: {
-    //     id: "",
-    //     name: "",
-    //     email: "",
-    //     entries: 0,
-    //     joined: ""
-    //   }
-    // };
   }
 
-  loadUser = data => {
+  loadUser = (data) => {
     this.setState({
       user: {
         id: data.id,
         name: data.name,
         email: data.email,
         entries: data.entries,
-        joined: data.joined
-      }
+        joined: data.joined,
+      },
     });
   };
 
@@ -80,7 +61,7 @@ class App extends React.Component {
   //     .then(console.log)
   // }
 
-  calculateFaceLocation = response => {
+  calculateFaceLocation = (response) => {
     const clarifaiFace =
       response.outputs[0].data.regions[0].region_info.bounding_box;
     const image = document.getElementById("inputimage");
@@ -90,49 +71,51 @@ class App extends React.Component {
       topRow: clarifaiFace.top_row * height,
       leftCol: clarifaiFace.left_col * width,
       rightCol: width - clarifaiFace.right_col * width,
-      bottomRow: height - clarifaiFace.bottom_row * height
+      bottomRow: height - clarifaiFace.bottom_row * height,
     };
   };
 
-  displayFaceBox = box => {
+  displayFaceBox = (box) => {
     this.setState({ box: box });
   };
 
-  onInputChange = event => {
+  onInputChange = (event) => {
     this.setState({ input: event.target.value });
   };
 
   onPictureSubmit = () => {
     this.setState({ imageUrl: this.state.input });
-    app.models
-      .predict(
-        // Further Models, see https://github.com/Clarifai/clarifai-javascript/blob/master/src/index.js
-        // Clarifai.COLOR_MODEL,
-        Clarifai.FACE_DETECT_MODEL,
-        this.state.input
-      )
-      .then(response => {
+    fetch("http://localhost:3000/imageurl", {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        input: this.state.input,
+      }),
+    })
+      .then(response => response.json())
+      .then((response) => {
         if (response) {
           fetch("http://localhost:3000/image", {
             method: "put",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              id: this.state.user.id
-            })
+              id: this.state.user.id,
+            }),
           })
-            .then(response => response.json())
-            .then(count => {
+            .then((response) => response.json())
+            .then((count) => {
               this.setState({
-                user: Object.assign(this.state.user, { entries: count })
+                user: Object.assign(this.state.user, { entries: count }),
               });
-            });
+            })
+            .catch(console.log);
         }
         this.displayFaceBox(this.calculateFaceLocation(response));
       })
-      .catch(err => console.log(err));
+      .catch((err) => console.log(err));
   };
 
-  onRouteChange = route => {
+  onRouteChange = (route) => {
     if (route === "signout") {
       this.setState(initialState);
     } else if (route === "home") {
