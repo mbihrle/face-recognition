@@ -24,7 +24,7 @@ class Register extends React.Component {
   };
 
   onSubmitRegister = () => {
-    fetch("http://localhost:3000/register", {
+    fetch("https://mysterious-eyrie-47265.herokuapp.com/register", {
       method: "post",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -79,6 +79,7 @@ class Register extends React.Component {
                 </label>
                 <input
                   onChange={this.onPasswordChange}
+                  onKeyPress={(event) => (event.key === "Enter") ? this.onSubmitRegister() : null}
                   className="key b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100"
                   type="text"
                   name="password"

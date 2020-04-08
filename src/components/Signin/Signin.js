@@ -18,7 +18,7 @@ class Signin extends React.Component {
   };
 
   onSubmitSignIn = () => {
-    fetch("http://localhost:3000/signin", {
+    fetch("https://mysterious-eyrie-47265.herokuapp.com/signin", {
       method: "post",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -60,6 +60,7 @@ class Signin extends React.Component {
                 </label>
                 <input
                   onChange={this.onPasswordChange}
+                  onKeyPress={(event) => (event.key === "Enter") ? this.onSubmitSignIn() : null}
                   className="key b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100"
                   type="text"
                   name="password"
